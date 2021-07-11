@@ -5,7 +5,7 @@ import torch
 from models.sub_layer import bert_encoding
 
 def get_sentence_to_label(csv_file):
-    lines = open(csv_file, 'r').readlines()
+    lines = open(csv_file, 'r', encoding='utf8').readlines()
     sentence_to_label = {}
     label_to_sentences = {}
     

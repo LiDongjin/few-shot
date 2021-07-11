@@ -64,10 +64,10 @@ if __name__ == '__main__':
 
     cfg_json_list = [
         "config/knn/1_shot.json",
-        "config/knn/5_shot.json",
-        "config/knn/10_shot.json",
-        "config/knn/15_shot.json",
-        "config/knn/20_shot.json",
+        # "config/knn/5_shot.json",
+        # "config/knn/10_shot.json",
+        # "config/knn/15_shot.json",
+        # "config/knn/20_shot.json",
     ]
 
     for cfg_json in cfg_json_list:
