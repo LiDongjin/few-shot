@@ -30,15 +30,7 @@ def eval_model(
     knn.fit(train_sentence_to_embedding, train_label)
     y_pred = knn.predict(test_sentence_to_embedding)
     acc = accuracy_score(test_label, y_pred)
-    # min_index = pairwise_distances_argmin(test_sentence_to_embedding, train_sentence_to_embedding, metric='cosine')
-    #
-    # predicted_label = [train_label[x] for x in min_index]
-    # assert len(predicted_label) == len(test_label)
-    # num_correct = 0
-    # for i in range(len(test_label)):
-    #     if predicted_label[i] == test_label[i]:
-    #         num_correct += 1
-    # acc = num_correct / len(test_label)
+
     return acc
 
 def train_eval_model(
@@ -46,7 +38,7 @@ def train_eval_model(
 ):
 
     #load data
-    train_sentence_to_label, train_label_to_sentences, test_sentence_to_label, train_sentence_to_encoding, test_sentence_to_encoding = dataloader.load_data(cfg)
+    train_sentence_to_label, train_label_to_sentences, test_sentence_to_label, train_sentence_to_encoding, test_sentence_to_encoding = dataloader.load_test_data(cfg)
 
     val_acc = eval_model(
         train_sentence_to_label, 
@@ -54,7 +46,7 @@ def train_eval_model(
         train_sentence_to_encoding, 
         test_sentence_to_label, 
         test_sentence_to_encoding,
-        K=5,
+        K=3,
     )
 
     print(f"val_acc={val_acc:.4f}")
@@ -63,11 +55,12 @@ if __name__ == '__main__':
     from utils import common, configuration
 
     cfg_json_list = [
-        "config/knn/1_shot.json",
+        # "config/knn/1_shot.json",
         # "config/knn/5_shot.json",
         # "config/knn/10_shot.json",
         # "config/knn/15_shot.json",
         # "config/knn/20_shot.json",
+        "config/ams_proto/5_shot.json"
     ]
 
     for cfg_json in cfg_json_list:

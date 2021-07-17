@@ -1,7 +1,7 @@
 {
     "exp_id": "knn_jd_15_shot",
-    "train_path": "/root/project/jd-few-shot/data/jd_few_shot_data/15_shot.txt",
-    "test_path": "/root/project/jd-few-shot/data/jd_few_shot_data/JD_test.txt",
+    "train_path": "data/jd_few_shot_data/15_shot.txt",
+    "test_path": "data/jd_few_shot_data/JD_test.txt",
     "num_classes": 2691,
     "samples_per_class": 15,
     "total_updates": 25000,

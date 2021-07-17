@@ -2,7 +2,7 @@ import torch.nn as nn
 
 
 class ProtoNet(nn.Module):
-    def __init__(self, embedding_net, embedding_size):
+    def __init__(self, embedding_net):
         super(ProtoNet, self).__init__()
         self.embedding_net = embedding_net
 
@@ -10,10 +10,5 @@ class ProtoNet(nn.Module):
         return self.embedding_net(x)
 
     def get_embedding(self, x):
-        return self.embedding_net(x)
-
-
-def prototypical_loss(input, target):
-
-
+        return self.forward(x)
 

@@ -5,10 +5,10 @@ import torch
 from models.sub_layer import bert_encoding
 
 def get_sentence_to_label(csv_file):
-    lines = open(csv_file, 'r', encoding='utf8').readlines()
+    lines = open(csv_file, 'r', encoding='utf8').readlines()[1:]
     sentence_to_label = {}
     label_to_sentences = {}
-    
+
     for line in lines:
         parts = line.strip().split('\t')
         label = int(parts[1].split(',')[-1])
@@ -95,11 +95,42 @@ def generate_siamese_batch(train_label_to_sentences, train_sentence_to_encoding,
 
     return sentence_1_embeddings.to(device), sentence_2_embeddings.to(device), labels.to(device)
 
+# 生产一个batch, support + query
+def generate_proto_batch(train_label_to_sentences, train_sentence_to_encoding, device, n_way=5, n_shot=5):
+    support_embeddings = []
+    query_embeddings = []
+    support_label = []
+    query_label = []
+    labels = list(train_label_to_sentences.keys())
+    sample_class = random.sample(labels, n_way)
+    cids = {}
+    label = -1
+    for cid in sample_class:
+        if cid not in cids:
+            label += 1
+            cids[cid] = label
+        support_sentence = random.sample(train_label_to_sentences[cid], n_shot)
+        query_sentence = [s for s in train_label_to_sentences[cid] if s not in support_sentence]
+        for sentence in support_sentence:
+            support_embeddings.append(train_sentence_to_encoding[sentence])
+            support_label.append(cids[cid])
+        for sentence in query_sentence:
+            query_embeddings.append(train_sentence_to_encoding[sentence])
+            query_label.append(cids[cid])
+    return torch.tensor(support_embeddings).to(device), torch.tensor(support_label).to(device), \
+           torch.tensor(query_embeddings).to(device), torch.tensor(query_label).to(device)
+
+
+# def generate_matching_batch(train_label_to_sentences, train_sentence_to_encoding, device, mb_size=64):
+#     sentence_embedding = []
+#     label = []
+#     for _ in range(mb_size):
+
+
 
 
 
 def load_data(cfg):
-
     train_sentence_to_label, train_label_to_sentences = get_sentence_to_label(cfg.train_path)
     test_sentence_to_label, _ = get_sentence_to_label(cfg.test_path)
 
@@ -113,29 +144,54 @@ def load_data(cfg):
 
     return train_sentence_to_label, train_label_to_sentences, test_sentence_to_label, train_sentence_to_encoding, test_sentence_to_encoding
 
+# BERT-encoding 后直接测试的
+# def load_test_data(cfg):
+#     test_sentence_to_label, test_label_to_sentence = get_sentence_to_label(cfg.test_path)
+#     test_sentence_to_encoding = bert_encoding.get_encoding_dict(test_sentence_to_label, cfg.test_path)
+#     proto_sentence_to_label = {}
+#     query_sentence_to_label = {}
+#     proto_label_to_sentence = {}
+#     for label, sentences in test_label_to_sentence.items():
+#         # 随机打乱
+#         random.seed(cfg.seed_num)
+#         random.shuffle(sentences)
+#         for i in range(5):
+#             proto_sentence_to_label[sentences[i]] = label
+#             if label not in proto_label_to_sentence:
+#                 proto_label_to_sentence[label] = [sentences[i]]
+#             else:
+#                 proto_label_to_sentence[label].append(sentences[i])
+#         for i in range(5, len(sentences)):
+#             query_sentence_to_label[sentences[i]] = label
+#
+#
+#     return proto_sentence_to_label, proto_label_to_sentence, query_sentence_to_label, test_sentence_to_encoding, test_sentence_to_encoding
 
-def get_train_x_y(cfg, train_label_to_sentences, train_sentence_to_encoding):
-    num_samples = len(list(itertools.chain.from_iterable(train_label_to_sentences.values())))
 
-    train_x = np.zeros((num_samples, cfg.encoding_size))
-    train_y = np.zeros((num_samples,))
+def load_test_data(cfg, istrain=False):
+    test_sentence_to_label, test_label_to_sentence = get_sentence_to_label(cfg.test_path)
+    test_sentence_to_encoding = bert_encoding.get_encoding_dict(test_sentence_to_label, cfg.test_path)
+    proto_sentence_to_label = {}
+    query_sentence_to_label = {}
+    proto_label_to_sentence = {}
 
-    i = 0
-    for train_label, sentences in train_label_to_sentences.items():
-        for sentence in sentences:
-            train_x[i, :] = train_sentence_to_encoding[sentence]
-            train_y[i] = train_label
-            i += 1
+    for label, sentences in test_label_to_sentence.items():
+        # 随机打乱
+        random.seed(cfg.seed_num)
+        random.shuffle(sentences)
+        # 截断点, 前面是训练集, 后面是测试集
+        if istrain == False:
+            mid = 5
+        else:
+            mid = 8
+        for i in range(mid):
+            proto_sentence_to_label[sentences[i]] = label
+            if label not in proto_label_to_sentence:
+                proto_label_to_sentence[label] = [sentences[i]]
+            else:
+                proto_label_to_sentence[label].append(sentences[i])
+        for i in range(mid, len(sentences)):
+            query_sentence_to_label[sentences[i]] = label
 
-    return train_x, train_y
 
-
-def get_test_x_y(cfg, test_sentence_to_label, test_sentence_to_encoding):
-    test_x = np.zeros((len(test_sentence_to_label), cfg.encoding_size))
-    test_y = np.zeros((len(test_sentence_to_label),))
-
-    for i, (test_sentence, label) in enumerate(test_sentence_to_label.items()):
-        test_x[i, :] = test_sentence_to_encoding[test_sentence]
-        test_y[i] = label
-
-    return test_x, test_y
+    return proto_sentence_to_label, proto_label_to_sentence, query_sentence_to_label, test_sentence_to_encoding, test_sentence_to_encoding

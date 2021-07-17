@@ -8,7 +8,7 @@ class EmbeddingNet(nn.Module):
         super(EmbeddingNet, self).__init__()
         self.dropout1 = nn.Dropout(p=dropout_p)
         self.dropout2 = nn.Dropout(p=0.4)
-        self.Tanh = nn.Tanh()  ##nn.Tanh() / nn.ReLU() etc
+        self.Tanh = nn.Tanh()
         self.fc1 = nn.Linear(hidden_size, 200)
         if batchnorm:
             self.bn1 = nn.BatchNorm1d(num_features=200)

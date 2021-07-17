@@ -12,7 +12,7 @@ def initialize_model(cfg):
     embedding_net = EmbeddingNet(cfg.encoding_size, cfg.embedding_size)
     model = TripletNet(embedding_net)
     loss_fn = TripletLoss(margin=0.4, distance_type='C')
-    optimizer = optim.Adam(model.parameters(), lr=2e-5)
+    optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -57,7 +57,7 @@ def eval_model(
 
 def train_eval_model(cfg):
     #load data
-    train_sentence_to_label, train_label_to_sentences, test_sentence_to_label, train_sentence_to_encoding, test_sentence_to_encoding = dataloader.load_data(cfg)
+    train_sentence_to_label, train_label_to_sentences, test_sentence_to_label, train_sentence_to_encoding, test_sentence_to_encoding = dataloader.load_test_data(cfg)
     
     # initialize model
     model, loss_fn, optimizer, device = initialize_model(cfg)
@@ -68,7 +68,7 @@ def train_eval_model(cfg):
 
     Path(f"plots/{cfg.exp_id}").mkdir(parents=True, exist_ok=True)
     writer = open(f"plots/{cfg.exp_id}/logs.csv", "w")
-    mb_size = 64
+    mb_size = 256
     target_activated_examples = 64
     avg_percent_activated = 1.0
     percent_activated_list = []
@@ -118,10 +118,10 @@ def train_eval_model(cfg):
 if __name__ == '__main__':
     from utils import common, configuration
     cfg_json_list = [
-        "config/triplet/5_shot.json",
-        "config/triplet/10_shot.json",
-        "config/triplet/15_shot.json",
-        "config/triplet/20_shot.json",
+        "config/ams_triplet/5_shot.json",
+        # "config/triplet/10_shot.json",
+        # "config/triplet/15_shot.json",
+        # "config/triplet/20_shot.json",
     ]
 
     for cfg_json in cfg_json_list:

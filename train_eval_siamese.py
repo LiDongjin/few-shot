@@ -60,8 +60,8 @@ def eval_model(
 
 def train_eval_model(cfg):
     # load data
-    train_sentence_to_label, train_label_to_sentences, test_sentence_to_label, train_sentence_to_encoding, test_sentence_to_encoding = dataloader.load_data(
-        cfg)
+    train_sentence_to_label, train_label_to_sentences, test_sentence_to_label, train_sentence_to_encoding, test_sentence_to_encoding \
+        = dataloader.load_data(cfg)
 
     # initialize model
     model, optimizer, device = initialize_model(cfg)
