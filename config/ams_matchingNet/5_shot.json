@@ -1,0 +1,9 @@
+{
+    "exp_id": "ams_matching_train_5_shot",
+    "train_path": "data/jd_few_shot_data/1_shot.txt",
+    "test_path": "data/jd_few_shot_data/ams.txt",
+    "num_classes": 635,
+    "samples_per_class": 5,
+    "total_updates": 25000,
+    "eval_interval": 500
+}
